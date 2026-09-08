@@ -11,6 +11,8 @@
    Output (GeoJSON, WGS84 lon/lat, coordinates rounded to 4 decimals, about 11 m):
      geo/places/<ST>/<geoid>.json    one city outline; props geoid, name, state, st
      geo/counties/<ST>/<geoid>.json  one county outline; props geoid, name, state, st
+     geo/states/<ST>.json            one state outline (dissolved from counties); props st, name
+     geo/us.json                     all states in one small file for the national map panel
      geo/zcta/<prefix>.json          all ZCTA outlines for one 3-digit ZIP prefix; props zip.
                                      Same sharding as data/, so a request for 60637 reads
                                      data/606.json for numbers and geo/zcta/606.json for shapes.
@@ -111,6 +113,33 @@ for (const [layer, shp, nameField] of [
   index.features[layer] = count;
   console.log('  ' + layer + ': ' + count + ' files across ' + index.states.length + ' states, ' + dupes + ' same-name collisions resolved by land area');
 }
+
+/* States: dissolved from the county layer, so no extra download. Two levels of
+   detail: one file per state for the fallback thumbnail, and one national file
+   simplified harder for the small US panel. */
+console.log('Converting states...');
+await mkdir(out + 'states', { recursive: true });
+await mkdir(stage + 'states', { recursive: true });
+ms([raw + 'county/cb_2023_us_county_500k.shp',
+  '-dissolve', 'STUSPS', 'copy-fields=STATE_NAME',
+  '-each', 'st=STUSPS, name=STATE_NAME',
+  '-filter-fields', 'st,name',
+  '-simplify', SIMPLIFY, 'keep-shapes', 'weighted',
+  '-split', 'st',
+  '-o', stage + 'states/', 'format=geojson', 'precision=' + PRECISION, 'id-field=st']);
+for (const f of await readdir(stage + 'states')) {
+  const gj = JSON.parse(await readFile(stage + 'states/' + f, 'utf8'));
+  const ft = gj.features[0];
+  await writeFile(out + 'states/' + f, JSON.stringify({ type: 'Feature', id: ft.properties.st, properties: ft.properties, bbox: bbox(ft.geometry).map(v => +v.toFixed(4)), geometry: ft.geometry }));
+}
+ms([raw + 'county/cb_2023_us_county_500k.shp',
+  '-dissolve', 'STUSPS', 'copy-fields=STATE_NAME',
+  '-each', 'st=STUSPS, name=STATE_NAME',
+  '-filter-fields', 'st,name',
+  '-simplify', '4%', 'keep-shapes', 'weighted',
+  '-o', out + 'us.json', 'format=geojson', 'precision=0.001', 'id-field=st']);
+index.features.states = (await readdir(out + 'states')).length;
+console.log('  states: ' + index.features.states + ' files plus us.json');
 
 /* ZCTAs: one file per 3-digit prefix, matching data/. */
 console.log('Converting zcta (largest layer, a minute or two)...');
