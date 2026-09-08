@@ -121,7 +121,7 @@ figcaption{font-size:.88rem;color:var(--muted);margin-top:10px;max-width:68ch}
         </div>
       </div>
       <div class="card">
-        <div class="label"><span>Proposed</span><em>even weight</em></div>
+        <div class="label"><span>Proposed</span><em>even weight, one of several arrangements</em></div>
         <div class="row proposed">
           <div>
             <div class="panel" id="prop-nat"></div>
@@ -134,13 +134,14 @@ figcaption{font-size:.88rem;color:var(--muted);margin-top:10px;max-width:68ch}
         </div>
       </div>
     </div>
-    <figcaption>Both drawn from the files in the repo. Left is the current arrangement. Right gives the two panels equal width and aligned tops; the detail panel shows Chicago's 57 ZIP codes tinted and 60637 filled, with the city line drawn on top.</figcaption>
+    <figcaption>Both drawn from the files in the repo. Left is the current arrangement. Right gives the two panels equal weight, shown side by side here; stacked or diagonal arrangements are equally valid. The detail panel shows Chicago's 57 ZIP codes tinted and 60637 filled, with the city line drawn on top.</figcaption>
   </figure>
 
   <div class="prose">
     <h3>Recommendation</h3>
     <ul>
-      <li>Equal width, side by side, same height, aligned top edges. When the request is a single city or smaller, the detail panel may grow to 60% of the row. It should never be smaller than the national panel.</li>
+      <li><b>Even weight is the requirement; the arrangement is yours.</b> Side by side, stacked national over detail, or a diagonal offset with the detail panel down and to the right of the national one, the way the current thumbnail sits but at equal size. The mockup above shows side by side only to illustrate the weighting.</li>
+      <li>The detail panel is never smaller than the national panel. When the request is a single city or smaller it may be the larger of the two, up to about 60/40.</li>
       <li>The detail panel always gets a one-line caption naming exactly what is drawn. The national panel keeps the state highlight and adds a dot at the selection.</li>
       <li>Draw order in the detail panel: frame fill, every ZIP that belongs to the frame as a light tint with hairline borders, selected ZIPs in brand navy, frame outline on top.</li>
       <li>Fit the frame's bounding box into the panel with 6 to 8% padding. A plain equirectangular projection with the x axis scaled by cos(center latitude) is indistinguishable from anything fancier at city scale.</li>

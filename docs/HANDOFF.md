@@ -57,7 +57,12 @@ With boundaries, the two panels do different jobs:
 - **National panel**: orientation. Where in the country. It is also the brand's frame; donors are national.
 - **Detail panel**: the claim. Which part of which city the number describes. This is the panel a Chicago donor will actually look at.
 
-Recommendation: give them equal width, side by side, same height, aligned top edges. The detail panel gets a one-line caption naming exactly what is drawn ("60637, within Chicago city limits"). The national panel keeps the state highlight and adds a dot at the selection. When the request is a single city or smaller, the detail panel may take up to 60% of the row; it should never be smaller than the national panel.
+Recommendation: give the two panels even visual weight. The arrangement is a design choice and stays open: side by side, stacked national over detail, or a diagonal offset where the detail panel sits down and to the right of the national one, as the current thumbnail does but at equal size. Whichever layout wins, the constraints are the same:
+
+- The detail panel is never smaller than the national panel. When the request is a single city or smaller it may be the larger of the two, up to about 60/40.
+- The detail panel gets a one-line caption naming exactly what is drawn ("60637, within Chicago city limits").
+- The national panel keeps the state highlight and adds a dot at the selection, so the two panels visibly agree.
+- The side-by-side mockup in `docs/handoff.html` illustrates the weighting, not the arrangement.
 
 Rendering the detail panel:
 
