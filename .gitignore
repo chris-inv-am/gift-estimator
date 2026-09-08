@@ -1,0 +1,13 @@
+# secrets and local env
+.env
+*.key
+
+# large raw inputs (re-downloadable); data/ output IS committed
+extract/gaz_zcta.txt
+*.zip
+
+node_modules/
+.DS_Store
+
+# raw Census relationship inputs (re-downloadable via extract/make_zip_places.mjs header)
+extract/raw/
