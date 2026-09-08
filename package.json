@@ -1,0 +1,11 @@
+{
+  "name": "gift-estimator-data",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "test": "node --test lib/",
+    "crosswalk": "node extract/make_zip_places.mjs",
+    "build": "node extract/build.mjs"
+  }
+}
