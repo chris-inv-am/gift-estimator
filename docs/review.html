@@ -1,0 +1,242 @@
+<title>Gift Card Estimator Review</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#FAFAF7; --surface:#FFFFFF; --ink:#1B2431; --muted:#5B6573; --rule:#D6DAE1;
+  --navy:#0F2D5C; --tint:#DCE4F1; --tint-2:#EEF2F8; --sand:#F1ECE1; --sand-ink:#5A4E36;
+  --bad:#B4321E; --bad-bg:#FBEDE9; --warn:#9A5B12; --warn-bg:#FBF3E4; --good:#2B6E3F; --good-bg:#E8F3EB;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ground:#10151D; --surface:#171E29; --ink:#E7EAF0; --muted:#98A2B3; --rule:#2C3543;
+  --navy:#9DBBEB; --tint:#253550; --tint-2:#1C2636; --sand:#2A2620; --sand-ink:#D8CDB4;
+  --bad:#F0907C; --bad-bg:#33201C; --warn:#E0A55A; --warn-bg:#2E2618; --good:#7FC495; --good-bg:#1B2E21;
+}}
+:root[data-theme="dark"]{
+  --ground:#10151D; --surface:#171E29; --ink:#E7EAF0; --muted:#98A2B3; --rule:#2C3543;
+  --navy:#9DBBEB; --tint:#253550; --tint-2:#1C2636; --sand:#2A2620; --sand-ink:#D8CDB4;
+  --bad:#F0907C; --bad-bg:#33201C; --warn:#E0A55A; --warn-bg:#2E2618; --good:#7FC495; --good-bg:#1B2E21;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.55 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding:48px 24px 96px}
+.prose{max-width:68ch}
+h1,h2,h3{font-family:"Source Serif 4",Georgia,"Times New Roman",serif;text-wrap:balance;margin:0}
+h1{font-size:2.25rem;line-height:1.12;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.5rem;line-height:1.2;font-weight:600;margin-top:64px;padding-top:24px;border-top:1px solid var(--rule)}
+h3{font-size:1.05rem;font-weight:600;margin:0}
+p{margin:14px 0}
+.eyebrow{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:14px}
+.lede{font-size:1.15rem;color:var(--muted);margin-top:14px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:20px;font-size:.9rem;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:600}
+a{color:var(--navy);text-decoration-color:var(--rule);text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em}
+code{background:var(--tint-2);padding:.1em .35em;border-radius:3px}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:16px 0}
+th,td{text-align:left;vertical-align:top;padding:9px 12px 9px 0;border-bottom:1px solid var(--rule)}
+th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tablewrap{overflow-x:auto}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+ul{padding-left:20px} li{margin:6px 0}
+.callout{background:var(--sand);color:var(--sand-ink);border-radius:4px;padding:16px 18px;margin:22px 0;font-size:.97rem}
+.callout b{color:inherit}
+
+/* verdict strip */
+.verdict{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}
+@media (max-width:720px){.verdict{grid-template-columns:1fr}}
+.v{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.v .k{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.v .s{font-family:"Source Serif 4",Georgia,serif;font-size:1.35rem;font-weight:600;line-height:1.2}
+.v .d{color:var(--muted);font-size:.92rem}
+.v.good .s{color:var(--good)} .v.bad .s{color:var(--bad)} .v.ok .s{color:var(--ink)}
+
+/* findings */
+.finding{display:grid;grid-template-columns:52px 1fr;gap:0 16px;padding:20px 0;border-bottom:1px solid var(--rule)}
+.finding .id{font-family:"IBM Plex Mono",monospace;font-weight:500;color:var(--navy);font-size:1rem;line-height:1.5;padding-top:2px}
+.finding .body{max-width:68ch}
+.finding p{margin:8px 0}
+.finding .why,.finding .fix{font-size:.95rem}
+.finding .why b,.finding .fix b{font-weight:600;color:var(--muted);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;margin-right:6px}
+.case{display:grid;grid-template-columns:1fr auto;gap:4px 16px;background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:10px 14px;margin:10px 0;font-size:.92rem}
+.case .in{font-family:"IBM Plex Mono",monospace;font-size:.86em;color:var(--ink)}
+.case .out{color:var(--bad);font-weight:600;text-align:right;white-space:nowrap}
+.case .out.ok{color:var(--good)}
+.case .want{grid-column:1 / -1;color:var(--muted);font-size:.88rem}
+.pill{display:inline-block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.pill.bad{background:var(--bad-bg);color:var(--bad)} .pill.warn{background:var(--warn-bg);color:var(--warn)} .pill.good{background:var(--good-bg);color:var(--good)} .pill.note{background:var(--tint-2);color:var(--navy)}
+.sect{color:var(--muted);font-size:.95rem;max-width:68ch;margin-top:10px}
+@media (prefers-reduced-motion:no-preference){ a{transition:text-decoration-color .15s} a:hover{text-decoration-color:var(--navy)} }
+</style>
+
+<div class="wrap">
+  <div class="prose">
+    <div class="eyebrow">Invest America · Gift estimate card · Code review and data test</div>
+    <h1>The numbers are right. The sentence parser is where the risk is.</h1>
+    <p class="lede">A review of the v5 estimator build, tested against the Census API, the live CDN, the live page, and a 96-phrase battery of the things a chair might actually type.</p>
+    <div class="meta">
+      <div><b>Build</b> Drafts (5), identical to the live Netlify site</div>
+      <div><b>Data</b> ACS 2019 to 2023 five-year, repo chris-inv-am/gift-estimator</div>
+      <div><b>Text version</b> <span class="mono">docs/REVIEW.md</span></div>
+    </div>
+  </div>
+
+  <div class="verdict">
+    <div class="v good"><div class="k">Data</div><div class="s">Clean</div><div class="d">40 of 40 random ZIPs match the Census exactly. City, county and state totals within 0.3% of the Census's own estimates.</div></div>
+    <div class="v bad"><div class="k">Parser</div><div class="s">Five silent wrong-number cases</div><div class="d">Plausible phrasings that produce a confident card with the wrong place, ages or dollars, and no warning.</div></div>
+    <div class="v good"><div class="k">Page and export</div><div class="s">Working</div><div class="d">No console errors, fonts and map load, PNG export renders at 2160 px wide with map and logos, pickers rewrite the request correctly.</div></div>
+  </div>
+
+  <h2>What was tested</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>Test</th><th>Result</th></tr>
+    <tr><td>The data layer's own 43 built-in tests, against the live CDN and against local repo data</td><td class="num">43 of 43 pass, both</td></tr>
+    <tr><td>96-phrase battery run through the real data layer in Node</td><td>27 silently wrong or ignored, 20 honest refusals, the rest correct</td></tr>
+    <tr><td>40 random ZCTAs vs the Census API: four age brackets and income</td><td class="num">40 of 40 exact</td></tr>
+    <tr><td>Chicago children 0 to 17, sum of assigned ZIPs vs Census direct estimate</td><td class="num">537,496 vs 536,064 (+0.3%)</td></tr>
+    <tr><td>Cook County, same</td><td class="num">1,113,336 vs 1,110,965 (+0.2%)</td></tr>
+    <tr><td>Illinois, same</td><td class="num">2,808,854 vs 2,808,879 (0.0%)</td></tr>
+    <tr><td>jsDelivr CDN: index, manifest and shards vs repo</td><td>Byte-identical, CORS open, cached 12 hours</td></tr>
+    <tr><td>Live page: console, fonts, map, sample badge</td><td>No errors, loaded, drawn, badge off</td></tr>
+    <tr><td>PNG export through html2canvas at 2x</td><td class="num">2160 x 2154 px, 405 KB, map and logos present</td></tr>
+    <tr><td>Picker flows: Springfield chips, New York state-or-city chips</td><td>Rewrite the request and re-render correctly</td></tr>
+  </table>
+  </div>
+
+  <h2>A. Wrong number, no warning <span class="pill bad">fix first</span></h2>
+  <p class="sect">Each of these produces a finished-looking card. Nothing on it says the request was misread.</p>
+
+  <div class="finding"><div class="id">A1</div><div class="body">
+    <h3>Two ZIP codes joined by "and" count only 17-year-olds</h3>
+    <div class="case"><span class="in">$250 per child in 60637 and 60649</span><span class="out">ages 17 to 17 · 1,335 children</span><span class="want">Should be ages 0 to 17, 22,408 children. The comma form "60637, 60649" is correct.</span></div>
+    <div class="case"><span class="in">$250 per child in 60637-1234</span><span class="out">ages 12 to 17</span><span class="want">A ZIP+4. Should be ages 0 to 17 for 60637.</span></div>
+    <p class="why"><b>Why</b>The age-range pattern has no word boundaries, so it matches "37 and 60" inside the two ZIP codes and clamps both to 17.</p>
+    <p class="fix"><b>Fix</b>Strip 5-digit tokens before parsing ages, and put word boundaries on both numbers.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">A2</div><div class="body">
+    <h3>"for" after the place drops the geography, or lands in Kentucky</h3>
+    <div class="case"><span class="in">$250 per child in Chicago for ages 3 to 10</span><span class="out">ZIP code 40828 · Ages, Kentucky</span><span class="want">Should be Chicago, 57 ZIPs, ages 3 to 10.</span></div>
+    <div class="case"><span class="in">$250 per child in Chicago for kids 3-10</span><span class="out">No ZIP codes</span><span class="want">Same request, different words.</span></div>
+    <p class="why"><b>Why</b>The geography is taken from everything after the last locative preposition, and "for" is on that list. The clause becomes "ages 3 to 10", and Ages is a real town that opens it.</p>
+    <p class="fix"><b>Fix</b>Drop "for" from the list, or try clauses from last to first and keep the first that resolves. Block town names that collide with grammar words unless a state follows.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">A3</div><div class="body">
+    <h3>An unrecognized city falls through to the whole state</h3>
+    <div class="case"><span class="in">$250 per child in Saint Louis, Missouri</span><span class="out">Missouri · 1,035 ZIPs · 1,386,612 children</span><span class="want">The city is 19 ZIPs. Off by a factor of 26.</span></div>
+    <div class="case"><span class="in">$250 per child in Lexington, Kentucky</span><span class="out">Kentucky · 779 ZIPs (before today's data fix)</span><span class="want">Now resolves to Lexington, 16 ZIPs, after the everyday-name fix below.</span></div>
+    <p class="why"><b>Why</b>When the city is not an index key, the state name in the same phrase matches on its own and wins.</p>
+    <p class="fix"><b>Fix</b>If the clause has leftover words before the state match, refuse and suggest instead of widening. "Saint" versus "St." is still a parser gap after the data fix.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">A4</div><div class="body">
+    <h3>Two places named, only the last one counted</h3>
+    <div class="case"><span class="in">$250 per child in Chicago and Evanston, Illinois</span><span class="out">Evanston only · 3 ZIPs</span><span class="want">Chicago dropped without a word.</span></div>
+    <div class="case"><span class="in">$250 per child in Cook County and Lake County, Illinois</span><span class="out">Lake County only · 28 ZIPs</span><span class="want">Cook County's 167 ZIPs dropped.</span></div>
+    <p class="fix"><b>Fix</b>Detect "and" or a comma between two resolved places; union them or refuse with a message.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">A5</div><div class="body">
+    <h3>Total budgets and "million" read as a per-child gift</h3>
+    <div class="case"><span class="in">$1 million for kids in Chicago</span><span class="out">$1 per child · $537,496 total</span><span class="want">"million" is not parsed.</span></div>
+    <div class="case"><span class="in">$250,000 total for kids in 60637</span><span class="out">$250,000 per child · $3,014,750,000 total</span><span class="want">"total" is not recognized.</span></div>
+    <p class="fix"><b>Fix</b>Parse million and billion. When "total" or "budget" appears, refuse, or divide by the child count and label the card as a per-child figure derived from a budget.</p>
+  </div></div>
+
+  <h2>B. Refuses or quietly ignores when it should work <span class="pill warn">friction</span></h2>
+  <p class="sect">Nothing here prints a wrong number. Most produce a picker or an empty card. A few default silently, which the card does show but does not flag.</p>
+
+  <div class="finding"><div class="id">B1</div><div class="body">
+    <h3>A gift that is the prefix of the income cutoff disappears</h3>
+    <div class="case"><span class="in">$50 per child in Illinois under $50,000 median family income</span><span class="out">Add a gift amount</span><span class="want">Same for $45 with $45,000 and $100 with $100,000. The gift loop skips any amount whose digits are a substring of the income clause. Compare positions, not substrings.</span></div>
+  </div></div>
+
+  <div class="finding"><div class="id">B2</div><div class="body">
+    <h3>State abbreviations are not understood</h3>
+    <div class="case"><span class="in">$250 per child in Peoria, IL</span><span class="out">Picker: Illinois, Arizona, Colorado</span><span class="want">The handoff promised "Peoria, IL". "Springfield, IL" and "Cook County, IL" behave the same.</span></div>
+    <div class="case"><span class="in">$250 per child in Washington, DC</span><span class="out">Picker: the state, or Washington, Pennsylvania</span><span class="want">"District of Columbia" works. "NYC" and "LA" return nothing.</span></div>
+    <p class="fix"><b>Fix</b>The code comment says abbreviations are derived on first use, but nothing derives them. Build the map from the state list at load time; add DC, NYC and LA as aliases.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">B3</div><div class="body">
+    <h3>Seventeen bare state names produce a state-or-city picker</h3>
+    <p>Indiana, California, Florida, Ohio, Washington, Kansas, Nevada, Oregon, Wyoming, Delaware, Virginia, Iowa, Louisiana, Tennessee, Vermont, Maine and New Hampshire each share their name with a small town, so "$250 per child in California" asks whether you meant California, Pennsylvania. Honest, but heavy.</p>
+    <p class="fix"><b>Fix</b>Let the state win when the same-named city is small, under ten ZIPs say. Keep the picker for New York and Washington, where the city is large.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">B4</div><div class="body">
+    <h3>The "PG County" alias is dead</h3>
+    <p>It targets "Prince Georges County, Maryland" but the index key keeps the apostrophe, so the alias is silently skipped at load.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">B5</div><div class="body">
+    <h3>Age words that silently default to 0 to 17</h3>
+    <p>"5 and up", "5+", "newborns", "teens" and "3 thru 10" all produce a card for ages 0 to 17. The card shows the range, so it is visible, but nothing says the phrase was not understood. Recognize "and up", "+" and "thru"; flag other age words.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">B6</div><div class="body">
+    <h3>Income words that are silently ignored</h3>
+    <p>"below $45,000 MFI" and "low income ZIP codes in Chicago" both return the whole city with no filter. Accept MFI; refuse "low income" with a hint to name a figure.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">B7</div><div class="body">
+    <h3>Neighborhood plus city name reaches the wrong state</h3>
+    <div class="case"><span class="in">$250 per child in Hyde Park Chicago</span><span class="out">Picker: Hyde Park, Pennsylvania or Utah</span><span class="want">"Lincoln Park, Chicago" offers New Jersey and Michigan. The neighborhood guard only knows compass words and downtown. When a resolved city also sits in the clause next to another matched place, refuse it the way "south side" is refused.</span></div>
+  </div></div>
+
+  <div class="finding"><div class="id">B8</div><div class="body">
+    <h3>New York boroughs</h3>
+    <p>"Brooklyn" offers Brooklyn, Ohio and Indiana. "Manhattan" offers Kansas. "the Bronx" returns nothing. Every New York City ZIP carries the city name "New York". A data-side option is below.</p>
+  </div></div>
+
+  <h2>C. Code review <span class="pill note">not reproduced, but real</span></h2>
+
+  <div class="finding"><div class="id">C1</div><div class="body">
+    <h3>A failed shard fetch is swallowed</h3>
+    <p>The shard loader catches any fetch error and returns an empty list. A statewide request that loses one of its sixty shard fetches prints a smaller number with no note. This is the one code path that can print a wrong figure with nothing visible. Surface the failure on the card, or fail the request.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">C2</div><div class="body">
+    <h3>The sample flag is already off</h3>
+    <p>It is hard-coded to false, so the "Sample data" badge never renders. The handoff said it stays on until reconciliation is recorded. This review is that record, so leaving it off is now defensible. Make it a decision rather than a default.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">C3</div><div class="body">
+    <h3>"Median family income" on multi-ZIP cards is the median of ZIP medians</h3>
+    <p>Unweighted. Not wrong, but the footnote should say "median across the ZIP codes shown" so it is not read as the area's household median.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">C4</div><div class="body">
+    <h3>The income filter silently drops ZIPs with no income estimate</h3>
+    <p>3,689 ZCTAs nationally have none. Add a note, as the age-gap note already does. Related: "ages 12 to 25" becomes "12 to 17" on the card with no note.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">C5</div><div class="body">
+    <h3>CDN caching can serve stale data for twelve hours</h3>
+    <p>The data is read from jsDelivr at the main branch, cached for twelve hours. After a data push, cards can read old numbers until the cache expires or is purged. I purged today's files. Recommend pinning to a commit or release tag and bumping on purpose, which also makes any printed card reproducible.</p>
+  </div></div>
+
+  <div class="finding"><div class="id">C6</div><div class="body">
+    <h3>Map basemap and export</h3>
+    <p>The US basemap comes from us-atlas on jsDelivr at render time and degrades to "Map unavailable" if it fails. Fine. The repo's own geo layer can replace it when the two-panel map lands. Export uses html2canvas at 2x with embedded fonts and data-URI logos; verified working. Actual file save and clipboard depend on the viewer's browser, and the page's toasts already explain the fallbacks.</p>
+  </div></div>
+
+  <h2>D. The data layer, and what was fixed today <span class="pill good">clean</span></h2>
+  <div class="prose">
+    <ul>
+      <li>40 random ZCTAs: the single-year ages sum back to the published brackets exactly, and incomes match.</li>
+      <li>No ZCTA has a suppressed age bracket in this vintage. 3,689 have no income estimate.</li>
+      <li>Every row has a state. 28,791 of 33,772 have a city.</li>
+    </ul>
+    <div class="callout"><b>Fixed today.</b> Consolidated city-counties carried Census legal names nobody types: Nashville-Davidson, Louisville/Jefferson County (also split across two names), Urban Honolulu, Boise City, Lexington-Fayette, Augusta-Richmond County, Athens-Clarke County, Macon-Bibb County and a few smaller ones. They are now indexed under their everyday names in both the data and the boundary files. Rebuilt, pushed, CDN purged. Nashville, Tennessee resolves to 28 ZIPs and Louisville, Kentucky to 35. A card can now read "Nashville, Tennessee" instead of "Nashville-Davidson, Tennessee".</div>
+    <h3>Data-side options still open</h3>
+    <ul>
+      <li>New York City boroughs could go into the area column from the county field: Kings is Brooklyn, New York County is Manhattan, and so on. "Brooklyn" would then resolve through the existing area index with no parser change. It is a decision, because the area column was reserved for the neighborhood question.</li>
+      <li>Chicago community areas in the same column, if pilot cities are chosen.</li>
+    </ul>
+    <h3>Reproducing</h3>
+    <p>Two scripts in the repo under <code>test/</code>: <code>battery.js</code> runs the data layer's own tests plus the 96 phrasings against the live CDN; <code>reconcile.mjs</code> checks random ZIPs and the three totals against the Census API.</p>
+  </div>
+</div>
