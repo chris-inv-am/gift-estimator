@@ -1,49 +1,65 @@
-This is a change request for the gift estimate card generator, the project we have been building here. It follows the two-panel map row brief and the parser fix list, and it comes from donor feedback: people who know their city want to see the actual ZIP code boundary on a real street map, with neighborhood names, parks and water, the way a ZIP lookup site shows it. Matt has reviewed the options and chosen one. This message gives you the decision, the data, a tested reference implementation, and the rules.
-
-Decision: Option A. The detail panel shows the selected ZIP alone on the OpenStreetMap "Positron" basemap (light grey), with our ZCTA polygon filled and outlined in brand navy. No color style, no city-context view.
+This is a change request for the gift estimate card generator, the project we have been building here. It replaces the earlier two-panel map row brief: instead of two panels of even weight, the card gets one map, and which map depends on how wide the request is. It comes from donor feedback (people who know their city want to see the actual ZIP boundary on real streets) and from a review with Matt, who chose the look. It also carries two smaller card changes and one new validator. Everything needed is in the repo, including a tested helper function.
 
 Repo: https://github.com/chris-inv-am/gift-estimator
-Research and the option images: docs/MAP-RESEARCH.md and docs/map-research.html
-Reference implementation, tested: docs/poc/detail-map.js (also served at https://cdn.jsdelivr.net/gh/chris-inv-am/gift-estimator@main/docs/poc/detail-map.js)
-Live demo page: docs/poc/detail-map-test.html
+Research and option images: docs/MAP-RESEARCH.md and docs/map-research.html
 Chosen look, full size: docs/poc/renders/A-60637-positron-single-zip.png
+Helper, tested: docs/poc/detail-map.js (also at https://cdn.jsdelivr.net/gh/chris-inv-am/gift-estimator@main/docs/poc/detail-map.js)
+Live demo of the helper: docs/poc/detail-map-test.html
 
-WHY THIS SOURCE
+PART 1. ONE MAP, CHOSEN BY THE REACH OF THE REQUEST
 
-Streets and labels come from OpenStreetMap through OpenFreeMap: free, no API key, no account, no usage limits, commercial use permitted. Nothing is pre-rendered or stored; the map is drawn in the browser when the card is made and baked into the PNG like everything else. The only obligation is a credit line on the card. Mapbox and Google were ruled out on their own terms: a card is stored and forwarded indefinitely, Mapbox caps caching of map content at 30 days, Google forbids storing static map images. OpenStreetMap data is licensed for exactly this use.
+The map takes the whole area beside the numbers. Pick the first rule that fits:
 
-WHAT TO BUILD
+a) One ZIP, or several ZIPs close together (same city or general area, frame under 60 km across): the street map. OpenStreetMap "Positron" basemap (light grey) with our ZCTA polygon(s) filled and outlined in brand navy, framed to the selection. No USA map. This is Option A, the one Matt chose. Streets, neighborhood names, parks and water come from the basemap.
+
+b) A whole city or a whole county: the same street map, framed to the city or county outline (drawn as a dashed navy line), with its ZIPs filled. No USA map. The helper's frame option does this. If the outline is missing (the 8 old Connecticut counties, about 25 dissolved cities), frame to the ZIPs instead.
+
+c) A whole state: the state outline panel, as the card draws it today, filling the map area. No USA map.
+
+d) ZIPs or places far apart, in different states or more than 60 km across: the current USA map with each location highlighted. This is the only case where the national map appears.
+
+e) The basemap fails to load, or WebGL is missing: draw the outline-only panel for that geography (ZIP outline, city, county) in the same space, with no OpenStreetMap credit line. The card is never blocked on the basemap.
+
+Caption under the map stays as it is: "60637, within Chicago city limits", or the county or state name when the ZIP has no city.
+
+Footnote: when the basemap is drawn (cases a and b), append exactly "Map data © OpenStreetMap contributors, © OpenMapTiles." Keep the Census sentences, including the ZCTA sentence; it now has a picture to point at.
+
+Why this source: OpenStreetMap through OpenFreeMap is free, needs no key or account, has no usage limits, and permits commercial use. Nothing is pre-rendered or stored; the map is drawn in the browser when the card is made and baked into the PNG like everything else. Mapbox and Google were ruled out on their own terms (a card is stored and forwarded indefinitely; Mapbox caps caching at 30 days, Google forbids storing static map images).
+
+How to build it:
 
 1. Load MapLibre GL (open source, UMD) next to d3 and html2canvas:
      <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
      <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-   and docs/poc/detail-map.js from the repo. It exposes one function.
+   and docs/poc/detail-map.js from the repo. It exposes one function, renderDetailMap.
 
-2. In the detail panel, for ZIP requests, call:
-     const png = await renderDetailMap({ zips: card.zipList, width: 400, height: 400 });
-     if (png) { insert <img src=png> into the panel; add renderDetailMap.ATTRIBUTION to the footnote; }
-     else { draw the outline-only panel exactly as today; }
-   The function fetches the ZCTA polygons from geo/zcta/<prefix>.json (same sharding as data/), fits the map to the selection with 12% padding, draws the polygon (fill 18% navy, 3 px navy line), waits for tiles, and returns a PNG data URL rendered at 2x. It returns null when WebGL is missing, tiles do not arrive within 6 seconds, or the selection is wider than 25 km. Null means: fall back, and do not add the credit line. The card is never blocked on the basemap.
+2. For cases a and b:
+     const png = await renderDetailMap({ zips: card.zipList, frame: cityOrCountyOutlineOrUndefined, width: W, height: H });
+     if (png) { put <img src=png> in the map area; append renderDetailMap.ATTRIBUTION to the footnote; }
+     else { draw the outline-only panel (case e); }
+   The helper fetches ZCTA polygons from geo/zcta/<prefix>.json (same sharding as data/), frames to the selection or to the frame outline with 12% padding, draws the fill (18% navy) and 3 px navy line, waits for tiles, and returns a PNG data URL at 2x. It returns null for WebGL missing, tiles not arriving within 6 seconds, or a frame wider than 60 km. Null means fall back and do not add the credit line. Width and height are yours; the area beside the numbers is 400 px wide today, and the map should fill whatever that area becomes.
 
-3. Footnote. When the basemap is drawn, append exactly: "Map data © OpenStreetMap contributors, © OpenMapTiles." Keep the ZCTA sentence; it now has a picture to point at.
+3. Export: the returned PNG is a plain <img>, so html2canvas captures it with no special handling. Do not try to capture the live MapLibre canvas; the helper does the copy and disposes the map.
 
-4. Export. The returned PNG is a plain <img>, so html2canvas captures it with no special handling. Do not try to capture the live MapLibre canvas; the helper already does the copy and disposes the map.
+Tested from the CDN copy of the repo: 60637 alone, three Chicago ZIPs, 90210, and all 57 Chicago ZIPs framed to the city outline each render in about a second; Chicago plus Peoria correctly returns the fallback signal.
 
-RULES, SLOTTED INTO THE EXISTING FALLBACK LADDER
+PART 2. TWO CARD CHANGES
 
-- One ZIP: basemap, framed to the ZIP. This is Option A.
-- Several ZIPs close together: same basemap, framed to the selection, while the selection is under 25 km across. The helper enforces the threshold. Beyond it, or in different counties or states, the existing outline rules apply.
-- City, county, state requests: keep the outline-only panel. A basemap under a whole city is noise at card size.
-- Basemap unavailable for any reason: outline-only panel, no credit line, caption unchanged.
-- Caption stays "60637, within Chicago city limits" (or the county or state name when the ZIP has no city).
-- Panel weight: the even-weight recommendation stands and gets stronger. A real map needs the room. Side by side, stacked or diagonal remains your call.
+- Remove the red markers for ZIP codes that have no median family income estimate. Keep the written disclaimer on the card exactly as it is; only the red visual highlighting goes.
+- Nothing else about the numbers, parser, exports or the Census footnote sentences changes in this request. The parser fixes remain a separate list.
 
-ONE OPTIONAL REFINEMENT
+PART 3. MINIMUM REACH VALIDATOR
 
-renderDetailMap accepts a neighbors list and tints those ZIPs faintly for context. Matt did not choose the city-context view, so leave neighbors empty for now. It is there if the design wants a hint of the surrounding ZIP grid later.
+Add a rule to the estimator: if the children reached on the card is below 5,000, the card still renders and can be looked at, but
+
+- a note appears on the estimator page (not necessarily on the card): "The minimum gift reach is 5,000 children. Widen the area or the age range to send this card."
+- Share, Copy image, Open image, Download PNG and Print are disabled while the count is below 5,000. The link button can stay, since the link is just the request text.
+- the readout's Where or Children cell should make the shortfall visible, the same way it flags a missing gift amount today.
+
+The threshold should be one named constant so it can be changed later without a hunt.
 
 WHAT IS NOT CHANGING
 
-The numbers, the parser, the national panel, the exports and the footnote's Census sentences. The data layer already has every polygon the map needs; nothing was added to data/ or geo/ for this.
+The numbers, the parser (separate fix list), the exports' mechanics, and the Census footnote sentences. The data layer already had every polygon the maps need; nothing was added to data/ or geo/ for this.
 
 Anything unclear, ask me before assuming.
