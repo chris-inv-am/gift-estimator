@@ -30,6 +30,7 @@
 */
 import { execFileSync } from 'node:child_process';
 import { mkdir, rm, readFile, writeFile, readdir } from 'node:fs/promises';
+import { EVERYDAY } from './make_zip_places.mjs';
 
 const root = new URL('../', import.meta.url).pathname;
 const raw = root + 'extract/raw/geo/';
@@ -61,7 +62,7 @@ await mkdir(out + 'zcta', { recursive: true });
 
 // Same suffix list the crosswalk builder strips, so keys line up with data/index.json.
 const LSAD = /\s+(city|town|village|borough|CDP|municipality|comunidad|zona urbana|urban county|consolidated government|metro government|metropolitan government|unified government|city and borough|town and borough|corporation|plantation|gore|grant|location|purchase|census area|charter township|township)(\s*\(balance\))?$/i;
-const shortName = s => s.replace(/,/g, ' ').replace(LSAD, '').trim();
+const shortName = s => { const t = s.replace(LSAD, '').trim(); return (EVERYDAY[t] || t).replace(/,/g, ' '); };
 
 const index = {
   states: [],

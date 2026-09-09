@@ -15,7 +15,26 @@
 */
 import { readFile, writeFile } from 'node:fs/promises';
 
+// Consolidated city-counties carry a legal name nobody types. Map the Census name
+// to the everyday one so "Nashville" resolves and the card reads "Nashville, Tennessee".
+// Imported by extract/make_geo.mjs so boundary index keys line up with data keys.
+export const EVERYDAY = {
+  'Louisville/Jefferson County': 'Louisville', 'Nashville-Davidson': 'Nashville', 'Urban Honolulu': 'Honolulu',
+  'Boise City': 'Boise', 'Lexington-Fayette': 'Lexington', 'Augusta-Richmond County': 'Augusta',
+  'Athens-Clarke County': 'Athens', 'Macon-Bibb County': 'Macon', 'Columbus Consolidated Government': 'Columbus',
+  'Hartsville/Trousdale County': 'Hartsville', 'Cusseta-Chattahoochee County': 'Cusseta',
+  'Georgetown-Quitman County': 'Georgetown', 'Butte-Silver Bow': 'Butte', 'Anaconda-Deer Lodge County': 'Anaconda',
+  'Islamorada, Village of Islands': 'Islamorada'
+};
+const everyday = s => EVERYDAY[s] || s;
+
+
 const here = new URL('./raw/', import.meta.url);
+
+const isMain = process.argv[1] && import.meta.url.endsWith('/' + process.argv[1].split('/').pop());
+if (isMain) await main();
+
+async function main() {
 async function rows(name) {
   const txt = (await readFile(new URL(name, here), 'utf8')).replace(/^﻿/, '');
   const lines = txt.trim().split('\n');
@@ -28,7 +47,7 @@ for (const r of await rows('states.txt')) states[r.STATEFP] = { abbr: r.STATE, n
 
 // Legal/statistical area descriptions the Census appends to place names.
 const LSAD = /\s+(city|town|village|borough|CDP|municipality|comunidad|zona urbana|urban county|consolidated government|metro government|metropolitan government|unified government|city and borough|town and borough|corporation|plantation|gore|grant|location|purchase|census area|charter township|township)(\s*\(balance\))?$/i;
-const stripLsad = s => s.replace(LSAD, '').trim();
+const stripLsad = s => everyday(s.replace(LSAD, '').trim());
 
 function best(list, keyField, nameField) {
   // For each ZCTA keep the row with the largest land-area overlap.
@@ -61,3 +80,4 @@ for (const zip of zips) {
 await writeFile(new URL('./zip_places.csv', import.meta.url), lines.join('\n') + '\n');
 console.log('zip_places.csv: ' + zips.length + ' ZCTAs, ' + withCity + ' with a city name, ' +
   Object.keys(county).length + ' with a county');
+}
