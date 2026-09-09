@@ -12,6 +12,10 @@ async function run(label, opts){ const t=Date.now(); const png = await renderDet
   await run('60637+60649+60653', {zips:['60637','60649','60653']});
   await run('90210', {zips:['90210']});
   await run('too wide (60637 + 61602 Peoria) -> fallback expected', {zips:['60637','61602']});
+  const idx = await (await fetch('https://cdn.jsdelivr.net/gh/chris-inv-am/gift-estimator@main/data/index.json')).json();
+  const rows = (await Promise.all(idx.cities['Chicago, Illinois'].map(p=>fetch('https://cdn.jsdelivr.net/gh/chris-inv-am/gift-estimator@main/data/'+p+'.json').then(r=>r.json())))).flat().filter(r=>r.city==='Chicago');
+  const chi = await (await fetch('https://cdn.jsdelivr.net/gh/chris-inv-am/gift-estimator@main/geo/places/IL/1714000.json')).json();
+  await run('whole city: Chicago, 57 ZIPs framed to the city outline', {zips: rows.map(r=>r.zip), frame: chi});
   window.__done = true;
 })();
 </script></body></html>
